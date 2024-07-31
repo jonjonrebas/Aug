@@ -1,115 +1,173 @@
-const config = {
-    type: Phaser.AUTO,
-    width: 800,
-    height: 600,
-    parent: 'game-container',
-    physics: {
-        default: 'arcade',
-        arcade: {
-            gravity: { y: 300 },
-            debug: false
+import java.util.ArrayList;
+import java.util.List;
+
+// Classe pour représenter un joueur
+class Player {
+    private String name;
+    private int health;
+    private int fruitsCollected;
+    private SpecialAttack specialAttack;
+
+    public Player(String name, SpecialAttack specialAttack) {
+        this.name = name;
+        this.health = 100;
+        this.fruitsCollected = 0;
+        this.specialAttack = specialAttack;
+    }
+
+    public void collectFruit() {
+        fruitsCollected++;
+        increaseAttackPower();
+    }
+
+    public void takeDamage(int damage) {
+        health -= damage;
+        if (health <= 0) {
+            System.out.println(name + " a été vaincu !");
+            // Gérer la défaite du joueur
         }
-    },
-    scene: {
-        preload: preload,
-        create: create,
-        update: update
-    }
-};
-
-let player;
-let cursors;
-let fruits;
-let score = 0;
-let scoreText;
-
-const game = new Phaser.Game(config);
-
-function preload() {
-    this.load.image('background', 'assets/background.png');
-    this.load.image('ground', 'assets/ground.png');
-    this.load.image('fruit', 'assets/fruits.png');
-    this.load.spritesheet('character1', 'assets/character1.png', { frameWidth: 32, frameHeight: 48 });
-    this.load.spritesheet('character2', 'assets/character2.png', { frameWidth: 32, frameHeight: 48 });
-    this.load.spritesheet('character3', 'assets/character3.png', { frameWidth: 32, frameHeight: 48 });
-}
-
-function create() {
-    // Background and ground
-    this.add.image(400, 300, 'background');
-    const platforms = this.physics.add.staticGroup();
-    platforms.create(400, 568, 'ground').setScale(2).refreshBody();
-
-    // Player creation
-    player = this.physics.add.sprite(100, 450, 'character1');
-    player.setBounce(0.2);
-    player.setCollideWorldBounds(true);
-
-    // Animations
-    this.anims.create({
-        key: 'left',
-        frames: this.anims.generateFrameNumbers('character1', { start: 0, end: 3 }),
-        frameRate: 10,
-        repeat: -1
-    });
-
-    this.anims.create({
-        key: 'turn',
-        frames: [{ key: 'character1', frame: 4 }],
-        frameRate: 20
-    });
-
-    this.anims.create({
-        key: 'right',
-        frames: this.anims.generateFrameNumbers('character1', { start: 5, end: 8 }),
-        frameRate: 10,
-        repeat: -1
-    });
-
-    // Fruits
-    fruits = this.physics.add.group({
-        key: 'fruit',
-        repeat: 11,
-        setXY: { x: 12, y: 0, stepX: 70 }
-    });
-
-    fruits.children.iterate(function (child) {
-        child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
-    });
-
-    // Score text
-    scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#000' });
-
-    // Collisions
-    this.physics.add.collider(player, platforms);
-    this.physics.add.collider(fruits, platforms);
-
-    this.physics.add.overlap(player, fruits, collectFruit, null, this);
-
-    // Input
-    cursors = this.input.keyboard.createCursorKeys();
-}
-
-function update() {
-    if (cursors.left.isDown) {
-        player.setVelocityX(-160);
-        player.anims.play('left', true);
-    } else if (cursors.right.isDown) {
-        player.setVelocityX(160);
-        player.anims.play('right', true);
-    } else {
-        player.setVelocityX(0);
-        player.anims.play('turn');
     }
 
-    if (cursors.up.isDown && player.body.touching.down) {
-        player.setVelocityY(-330);
+    public void increaseAttackPower() {
+        // Augmenter la puissance des attaques spéciales en fonction des fruits collectés
+    }
+
+    public void useSpecialAttack() {
+        specialAttack.execute();
+    }
+
+    // Getters et Setters
+    public int getHealth() { return health; }
+    public int getFruitsCollected() { return fruitsCollected; }
+}
+
+// Interface pour représenter une attaque spéciale
+interface SpecialAttack {
+    void execute();
+}
+
+// Exemple d'attaque spéciale : Rugissement puissant
+class Roar implements SpecialAttack {
+    public void execute() {
+        System.out.println("Rugissement puissant! Les ennemis sont paralysés.");
+        // Logique pour paralyser les ennemis
     }
 }
 
-function collectFruit(player, fruit) {
-    fruit.disableBody(true, true);
-    score += 10;
-    scoreText.setText('Score: ' + score);
-    // Power up logic can be added here
+// Classe pour représenter un dinosaure
+class Dinosaur {
+    private int health;
+    private int damage;
+    private List<Projectile> projectiles;
+
+    public Dinosaur(int health, int damage) {
+        this.health = health;
+        this.damage = damage;
+        this.projectiles = new ArrayList<>();
+    }
+
+    public void shootProjectile() {
+        // Logique pour tirer des projectiles
+        System.out.println("Le dinosaure tire un projectile!");
+        projectiles.add(new Projectile(10, 10, 0, 0));
+    }
+
+    public void takeDamage(int damage) {
+        health -= damage;
+        if (health <= 0) {
+            System.out.println("Le dinosaure a été vaincu!");
+            // Gérer la défaite du dinosaure
+        }
+    }
+
+    // Getters et Setters
+    public int getHealth() { return health; }
+}
+
+// Classe pour représenter un projectile
+class Projectile {
+    private int speed;
+    private int damage;
+    private int x, y;
+
+    public Projectile(int speed, int damage, int x, int y) {
+        this.speed = speed;
+        this.damage = damage;
+        this.x = x;
+        this.y = y;
+    }
+
+    public void move() {
+        // Logique pour déplacer le projectile
+        x += speed;
+        System.out.println("Le projectile se déplace.");
+    }
+
+    public boolean checkCollision(Player player) {
+        // Logique pour vérifier la collision avec un joueur
+        return false;
+    }
+
+    // Getters et Setters
+    public int getDamage() { return damage; }
+}
+
+// Classe pour représenter un fruit
+class Fruit {
+    private int x, y;
+
+    public Fruit(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    // Getters et Setters
+}
+
+// Classe principale pour gérer le jeu
+public class DinosaurGame {
+    private Player player;
+    private List<Dinosaur> dinosaurs;
+    private List<Fruit> fruits;
+
+    public DinosaurGame() {
+        // Initialisation des éléments du jeu
+        player = new Player("T-Rex", new Roar());
+        dinosaurs = new ArrayList<>();
+        fruits = new ArrayList<>();
+    }
+
+    public void startGame() {
+        System.out.println("Le jeu commence!");
+
+        // Logique pour démarrer le jeu, par exemple, créer des dinosaures et des fruits
+        dinosaurs.add(new Dinosaur(100, 10));
+        fruits.add(new Fruit(100, 100));
+    }
+
+    public void gameLoop() {
+        // Boucle principale du jeu
+        while (player.getHealth() > 0) {
+            // Logique de jeu, mise à jour des états des objets, etc.
+            System.out.println("Boucle de jeu en cours...");
+            player.collectFruit(); // Exemple de collecte de fruit
+            player.useSpecialAttack(); // Exemple d'utilisation d'attaque spéciale
+
+            for (Dinosaur dino : dinosaurs) {
+                dino.shootProjectile();
+            }
+
+            // Terminer la boucle si le joueur est vaincu
+            if (player.getHealth() <= 0) {
+                System.out.println("Game Over!");
+                break;
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        DinosaurGame game = new DinosaurGame();
+        game.startGame();
+        game.gameLoop();
+    }
 }
