@@ -18,7 +18,6 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            position: relative;
         }
 
         #gameCanvas {
@@ -31,19 +30,21 @@
 </head>
 <body>
     <div id="game-container">
-        <canvas id="gameCanvas"></canvas>
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
     </div>
     <script>
-        const canvas = document.getElementById('gameCanvas');
-        const context = canvas.getContext('2d');
+        window.onload = function() {
+            const canvas = document.getElementById('gameCanvas');
+            const context = canvas.getContext('2d');
 
-        // Assurez-vous que le canvas et le contexte sont définis
-        if (canvas && context) {
-            context.fillStyle = 'green';
-            context.fillRect(0, 0, canvas.width, canvas.height);
-        } else {
-            console.error("Canvas ou contexte non défini");
-        }
+            if (context) {
+                // Remplir le canvas avec une couleur verte
+                context.fillStyle = 'green';
+                context.fillRect(0, 0, canvas.width, canvas.height);
+            } else {
+                console.error("Impossible d'obtenir le contexte 2D");
+            }
+        };
     </script>
 </body>
 </html>
